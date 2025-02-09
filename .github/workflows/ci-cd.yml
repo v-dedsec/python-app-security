@@ -1,0 +1,48 @@
+name: CI/CD and Security Checks
+
+on:
+  push:
+    branches:
+      - main # Change this branch name according to your setup
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Python application setup
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install pytest-cov coverage
+          
+      - name: Python code analysis (SAST)
+        run: |
+          coverage run --target=100 --source='.' $(pytest) --verbose
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install web application scanner
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt # If you have dependencies listed in a file
+          pip install ZAP-OM
+      
+      - name: Dynamic Application Security Testing (DAST)
+        run: |
+          ./ZAP-OM/zebra.sh # Replace this with the appropriate command for your setup
+
+  sca:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependency scanner
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt # If you have dependencies listed in a file
+          pip install pip-sweep
+
+      - name: Static Dependency Analysis (SCA)
+        run: |
+          ./pip-sweep.sh # Replace this with the appropriate command for your setup
